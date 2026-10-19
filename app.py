@@ -2,6 +2,7 @@
 import streamlit as st
 import pandas as pd
 import joblib
+import plotly.express as px
 from pathlib import Path
 
 # ======================================
@@ -123,11 +124,27 @@ st.divider()
 
 st.subheader("📈 날짜별 전체 의류 판매량")
 
-st.line_chart(
-    daily_sales.set_index("Date")[["Units Sold"]],
-    y_label="판매량 (개)",
-    x_label="날짜"
+sales_fig = px.line(
+    daily_sales,
+    x="Date",
+    y="Units Sold",
+    labels={"Date": "날짜", "Units Sold": "판매량 (개)"},
+    title=None
 )
+sales_fig.update_xaxes(
+    tickangle=0,
+    tickformat="%Y-%m",
+    dtick="M1",
+    automargin=True,
+    title_standoff=12
+)
+sales_fig.update_yaxes(tickangle=0, automargin=True)
+sales_fig.update_layout(
+    height=420,
+    margin=dict(l=20, r=20, t=20, b=50),
+    hovermode="x unified"
+)
+st.plotly_chart(sales_fig, use_container_width=True)
 
 # ======================================
 # 5. 기온과 판매량의 관계
@@ -140,13 +157,17 @@ left, right = st.columns(2)
 with left:
     st.write("**평균 기온별 일일 판매량**")
 
-    st.scatter_chart(
+    temp_fig = px.scatter(
         daily_sales,
         x="평균기온",
         y="Units Sold",
-        x_label="평균 기온 (°C)",
-        y_label="일일 판매량 (개)"
+        labels={"평균기온": "평균 기온 (°C)", "Units Sold": "일일 판매량 (개)"},
+        hover_data={"Date": True, "최고기온": True, "최저기온": True}
     )
+    temp_fig.update_xaxes(tickangle=0, automargin=True)
+    temp_fig.update_yaxes(tickangle=0, automargin=True)
+    temp_fig.update_layout(height=380, margin=dict(l=20, r=15, t=20, b=45))
+    st.plotly_chart(temp_fig, use_container_width=True)
 
 with right:
     st.write("**기온 구간별 평균 판매량**")
@@ -169,13 +190,16 @@ with right:
         .reset_index()
     )
 
-    st.bar_chart(
+    temp_fig_bar = px.bar(
         temp_summary,
         x="기온 구간",
         y="Units Sold",
-        x_label="평균 기온 구간",
-        y_label="평균 일일 판매량 (개)"
+        labels={"기온 구간": "평균 기온 구간", "Units Sold": "평균 일일 판매량 (개)"}
     )
+    temp_fig_bar.update_xaxes(tickangle=0, automargin=True)
+    temp_fig_bar.update_yaxes(tickangle=0, automargin=True)
+    temp_fig_bar.update_layout(height=380, margin=dict(l=20, r=15, t=20, b=55))
+    st.plotly_chart(temp_fig_bar, use_container_width=True)
 
 st.caption(
     "기온은 한국 대표 도시 9곳의 일별 평균을 사용했습니다. "
@@ -197,13 +221,16 @@ monthly_sales = (
 
 monthly_sales["월"] = monthly_sales["월"].astype(str) + "월"
 
-st.bar_chart(
+monthly_fig = px.bar(
     monthly_sales,
     x="월",
     y="Units Sold",
-    x_label="월",
-    y_label="평균 일일 판매량 (개)"
+    labels={"월": "월", "Units Sold": "평균 일일 판매량 (개)"}
 )
+monthly_fig.update_xaxes(tickangle=0, automargin=True)
+monthly_fig.update_yaxes(tickangle=0, automargin=True)
+monthly_fig.update_layout(height=400, margin=dict(l=20, r=20, t=20, b=50))
+st.plotly_chart(monthly_fig, use_container_width=True)
 
 st.divider()
 
